@@ -1,0 +1,69 @@
+---
+# Create a VM from a template
+- name: Creating VM with additional disk
+  vmware_guest:
+    hostname: "{{ item.value.hostname }}"
+    username: "{{ item.value.username }}"
+    password: "{{ item.value.password }}"
+    validate_certs: "{{ item.value.validate_certs }}"
+    datacenter: "{{ item.value.datacenter }}"
+    folder: "{{ item.value.datacenter }}"
+    name: "{{ item.key }}"
+    state: poweredon
+    annotation: "{{ item.value.annotation }}"
+    disk:
+    - size_gb: "{{ item.value.disk[0].size_gb | default(omit) }}"
+      type: thin
+      datastore: "{{ item.value.disk[0].datastore | default(omit) }}"
+    networks:
+    - name: "{{ item.value.networks[0].name }}"
+      ip: "{{ item.value.networks[0].ip }}"
+      netmask: "{{ item.value.networks[0].netmask }}"
+      gateway: "{{ item.value.networks[0].gateway }}"
+      dns_servers:
+      - "{{ item.value.networks[0].dns_servers }}"
+    hardware:
+      memory_mb: "{{ item.value.hardware.memory_mb }}"
+      num_cpus: "{{ item.value.hardware.num_cpus }}"
+    customization:
+      dns_servers:
+      - "{{ item.value.customization.dns_servers }}"
+      hostname: "{{ item.key }}"
+    template: "{{ item.value.template }}"
+    wait_for_ip_address: yes
+  loop: "{{ lookup('dict', vmware_smartlis_deployment) }}"
+  delegate_to: localhost
+  when: item.value.disk is defined
+  ignore_errors: yes
+
+- name: Create the VM without additional disks
+  vmware_guest:
+    hostname: "{{ item.value.hostname }}"
+    username: "{{ item.value.username }}"
+    password: "{{ item.value.password }}"
+    validate_certs: "{{ item.value.validate_certs }}"
+    datacenter: "{{ item.value.datacenter }}"
+    folder: "{{ item.value.datacenter }}"
+    name: "{{ item.key }}"
+    state: poweredon
+    annotation: "{{ item.value.annotation }}"
+    networks:
+    - name: "{{ item.value.networks[0].name }}"
+      ip: "{{ item.value.networks[0].ip }}"
+      netmask: "{{ item.value.networks[0].netmask }}"
+      gateway: "{{ item.value.networks[0].gateway }}"
+      dns_servers:
+      - "{{ item.value.networks[0].dns_servers }}"
+    hardware:
+      memory_mb: "{{ item.value.hardware.memory_mb }}"
+      num_cpus: "{{ item.value.hardware.num_cpus }}"
+    customization:
+      dns_servers:
+      - "{{ item.value.customization.dns_servers }}"
+      hostname: "{{ item.key }}"
+    template: "{{ item.value.template }}"
+    wait_for_ip_address: yes
+  loop: "{{ lookup('dict', vmware_smartlis_deployment ) }}"
+  when: item.value.disk is not defined
+  delegate_to: localhost
+  ignore_errors: yes

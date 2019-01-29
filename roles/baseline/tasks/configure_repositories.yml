@@ -1,0 +1,21 @@
+---
+- name: Copy sources.list to sources.list.ori
+  command: mv /etc/apt/sources.list /etc/apt/sources.list.ori
+
+- name: copy sources.list from github repo
+  get_url:
+    url: ftp://192.1.1.181/smartlis/sources.list
+    dest: /etc/apt/
+
+- name: copy keys file
+  get_url:
+    url: ftp://192.1.1.181/smartlis/trusted-keys
+    dest: /home/
+
+- name: install keys
+  become: yes
+  shell: apt-key add /home/trusted-keys > /home/smartlis/keys.log
+
+- name: update apt cache
+  apt:
+    update_cache: yes

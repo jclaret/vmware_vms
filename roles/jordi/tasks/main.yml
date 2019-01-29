@@ -1,0 +1,9 @@
+---
+# tasks file for jordi
+#
+- name:
+  debug:
+    # msg: "{{ item.value.disk[0].size_gb if item.value.disk is defined else 'NONE' }}"
+    msg: "{{ item.value.networks[0].ip }}"
+  loop: "{{ lookup('dict', vmware_smartlis_deployment) }}"
+  #when: item.value.disk is defined
